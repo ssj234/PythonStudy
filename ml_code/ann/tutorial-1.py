@@ -1,26 +1,26 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
 
-#假设要学习到的最后的方程为y=x^2-0.5 
+#假设要学习到的最后的方程为y=x*2 
 
 #构造数据
 import numpy as np
 
-# 构造300个点，分布在-1到1区间 
+# 构造100个点，分布在-1到1区间 
 # linspace函数通过指定开始值、终值和元素个数来创建一维数组，等差数列
 x_data=np.linspace(-1,1,100)[:,np.newaxis]
 noise=np.random.normal(0,0.05,x_data.shape)
-y_data = np.square(x_data)-0.5 +noise
+y_data = 2*(x_data)+noise
 
 # 输出数据
 # print x_data.shape,y_data.shape
 
 import matplotlib.pyplot as plt
 
-# 分割出3行2列子图，在1号作图
+# 分割出1行1列子图，在1号作图
 plt.subplot(1,1,1)
-plt.title('y=x^2-0.5')
-plt1,=plt.plot(x_data,y_data,color='red',label='train data(noise)')   
+plt.title('y=x*2')
+plt1,=plt.plot(x_data,y_data,'o',color='red',label='train data(noise)')   
 
 
 class Layer(object):
@@ -38,9 +38,8 @@ class Layer(object):
 		self.name='I'+str(input)+'O'+str(output)
 		#self.outputData=[] #输出数据
 		while index < output:
-			# [(1 if x%2==0 else -1) for x in range(10)]
 			self.weight.append(np.array([0.4*(x%2==0) for x in range(0,input)])) #[0.4 for x in range(0,input)] #np.random.normal(0,0.5,input)
-			self.intercept.append(0.5)
+			self.intercept.append(0)
 			index = index + 1
 		self.weight = np.array(self.weight)
 		self.intercept = np.array(self.intercept).reshape(-1,1)
@@ -73,7 +72,7 @@ class Layer(object):
 		self.errorData = []
 		# print type(self.errorData)
 		outdata = np.array(self.outputData)
-		self.errorData = outdata*(1-outdata)*(np.array(trainResult)-outdata)
+		self.errorData = (outdata-np.array(trainResult))
 		return self.errorData
 
 	def calcError(self,errWeightSum):
@@ -131,7 +130,8 @@ class ANN(object):
 		while dataIndex < length:
 			count = 0 	#count为0
 			endflag = False
-			trainData = x_data[dataIndex] #当前训练的数据
+			trainData = x_data[dataIndex] #当前训练的数据,每次训练一个数据 应该使用批次进行训练
+			trainDataBegin = x_data[dataIndex] #当前训练的数据
 			trainResult = y_data[dataIndex] #当前训练的数据的结果
 			print '[0-Fit]begin trainData is', trainData,'result is', trainResult
 			while count < size:
@@ -167,7 +167,7 @@ class ANN(object):
 				
 				# 调整权重
 				for layer in self.layers:
-					if (endflag==False) and (abs(layer.errorData[0,0]) < 0.00001):
+					if (endflag==False) and (abs(layer.errorData[0,0]) < 0.000001):
 						endflag = True
 						break;
 					# print '-------------------------------------'
@@ -175,10 +175,10 @@ class ANN(object):
 					# print '->>',layer.name,'weight is:',type(layer.weight),layer.weight,(layer.weight).shape
 					# print '->>',layer.name,'outdata is:',type(layer.outputData)
 					# print '->>',layer.name,'outdata is 2:',np.array(layer.outputData)
-					tmp = (np.asarray(layer.errorData)*np.array(layer.outputData)*learningRate)
+					tmp = (np.asarray(layer.errorData)*np.array(trainDataBegin)*2*learningRate)
 					# print '->>',layer.name, tmp ,type(tmp),tmp.shape
-					layer.weight = layer.weight + tmp
-					layer.intercept = layer.intercept +  (np.asarray(layer.errorData)*learningRate)
+					layer.weight = layer.weight - tmp
+					# layer.intercept = layer.intercept +  (np.asarray(layer.errorData)*learningRate)
 					print '[3-rechange]',layer.name, layer.weight ,layer.intercept
 
 				count = count +1 #同一个数据开始下一次训练
@@ -193,18 +193,18 @@ class ANN(object):
 		return x_data
 
 ann = ANN()
-layer1 = Layer(1,4)
-layer2 = Layer(4,4)
-layer3 = Layer(4,1,hidden=False)
-ann.addLayer(layer1)
-ann.addLayer(layer2)
+# layer1 = Layer(1,4)
+# layer2 = Layer(4,4)
+layer3 = Layer(1,1,hidden=False)
+# ann.addLayer(layer1)
+# ann.addLayer(layer2)
 ann.addLayer(layer3)
-ann.fit(x_data,y_data)
+ann.fit(x_data,y_data,size=50,learningRate=0.01)
 print ann.predict([[0.2]])
 
 
 x_test=np.linspace(-1,1,100)[:,np.newaxis]
-rs_real=np.square(x_test)-0.5
+rs_real=x_test*2
 
 ann_test=ann.predict(x_test.reshape(1,-1).tolist())
 
