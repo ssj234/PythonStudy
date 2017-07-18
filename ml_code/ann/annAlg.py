@@ -1,14 +1,14 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
 
-#假设要学习到的最后的方程为y=x^2-0.5 
+#假设要学习到的最后的方程为y=x^2-0.5
 
 #构造数据
 import numpy as np
 
-# 构造300个点，分布在-1到1区间 
+# 构造300个点，分布在-1到1区间
 # linspace函数通过指定开始值、终值和元素个数来创建一维数组，等差数列
-x_data=np.linspace(-1,1,100)[:,np.newaxis]
+x_data=np.linspace(-1,1,100)[:,np.newaxis]  # x是n
 noise=np.random.normal(0,0.05,x_data.shape)
 y_data = np.square(x_data)-0.5 +noise
 
@@ -20,11 +20,12 @@ import matplotlib.pyplot as plt
 # 分割出3行2列子图，在1号作图
 plt.subplot(1,1,1)
 plt.title('y=x^2-0.5')
-plt1,=plt.plot(x_data,y_data,color='red',label='train data(noise)')   
+plt1,=plt.plot(x_data,y_data,'o',color='red',label='train data(noise)')   
+# plt1,=plt.plot(x_data,y_data,color='red',label='train data(noise)')
 
 
 class Layer(object):
-	
+
 	# 输入为n 输出为m（该层的神经元个数），每个神经元有一个n为的weight
 	# 每个单元有一个截距
 	def __init__(self, input,output,active='log',hidden=True):
@@ -36,65 +37,36 @@ class Layer(object):
 		self.weight=[]
 		self.intercept =[] #截距
 		self.name='I'+str(input)+'O'+str(output)
-		#self.outputData=[] #输出数据
-		while index < output:
-			# [(1 if x%2==0 else -1) for x in range(10)]
-			self.weight.append(np.array([0.4*(x%2==0) for x in range(0,input)])) #[0.4 for x in range(0,input)] #np.random.normal(0,0.5,input)
-			self.intercept.append(0.5)
-			index = index + 1
-		self.weight = np.array(self.weight)
-		self.intercept = np.array(self.intercept).reshape(-1,1)
+		self.weight =np.random.random((input,output))
+		self.intercept = np.random.random((1,1))
 		self.outputData = [] #每层的单元的输出结果
-		self.errorData = [] #每层每个单元的ERR
+		self.inputData = [] #每层的单元的输出结果
 		self.hidden = hidden
 		print 'weight is ',self.weight
 		print 'intercept is ',self.intercept
-	
-	def getWeight(index):
-		return self.weight[index]
+
 
 	# 输入是前一层的输出，输出是output的个数
-	def calcWeight(self,trainData):
-		# index = 0
-		#print '==============='
-		# print 'weight',np.matrix(self.weight)
-		# print 'input',np.matrix(trainData)
-		self.outputData = []
-		self.outputData = np.matrix(self.weight) * np.matrix(trainData)
+	def calcResult(self,trainData):
+		self.inputData = trainData
+		self.outputData = np.dot(trainData,self.weight)
 		# print 'w*i',self.outputData,np.asarray(self.outputData),self.intercept
-		self.outputData = np.asarray(self.outputData) + self.intercept
+		self.outputData = self.outputData + self.intercept
 		# print 'change',self.outputData
 		if self.hidden == True:
-				self.outputData = self.doubles(self.outputData)
+			self.outputData = self.log(self.outputData)
 		return self.outputData
 
-	def calcErrorLast(self,trainResult):
-		index = 0
-		self.errorData = []
-		# print type(self.errorData)
-		outdata = np.array(self.outputData)
-		self.errorData = outdata*(1-outdata)*(np.array(trainResult)-outdata)
-		return self.errorData
+	def changeWeight(self,delta,rate):
+		if self.hidden == True: # 隐藏层
+			self.weight = self.weight - (rate * delta * self.weight * self.outputData*(1- self.outputData))
+			self.intercept =  self.intercept   - (rate) * delta
+			return delta
+		else:  #输出层
+			self.weight = self.weight -(rate) * delta
+			self.intercept =  self.intercept   - (rate) * delta
+			return delta
 
-	def calcError(self,errWeightSum):
-		index = 0
-		self.errorData = []
-		outdata = np.array(self.outputData)
-		self.errorData = outdata*(1-outdata)*(errWeightSum[index])
-		return self.errorData
-
-	# 本层错误加权求和,使用输出的[每列为输出对应输入的权重  ipt*opt]*[O1 O2](输出列向量，opt*1)= ipt*1
-	# 结果为每个输入的Err加权求和
-	# ipt * 1
-	def getErrWeightSum(self):
-		# self.weight 是每个细胞元的
-		# print '==[get weight then add]=='
-		# print '>>>EWS:weight ',np.matrix(self.weight).transpose()
-		# print '>>>EWS:errorData ',self.errorData,type(self.errorData),self.errorData[0]
-		# print '>>>EWS:err-matrix',np.matrix(self.errorData)
-		a = np.matrix(self.weight).transpose()* np.matrix(self.errorData)
-		# print '>>>EWS:rs is ' ,a 
-		return a
 
 	def log(self,ndarray):
 		return 1/(1+np.exp(-ndarray))
@@ -102,17 +74,20 @@ class Layer(object):
 	def doubles(self,ndarray):
 		return 2/(1+np.exp(-ndarray))-1
 
+	def max(self,ndarray):
+		return np.where(ndarray<0,0,ndarray)
+
 	def predict1(self,x_data):
 		print 'myweight',self.weight,x_data
-		x_data =np.matrix(self.weight) * np.matrix(x_data)
+		x_data = np.array(x_data).dot(self.weight)
 		print 'cheng', x_data,self.intercept
 		x_data = x_data + self.intercept
 		if self.hidden == True:
-			x_data = self.doubles(x_data)
+			x_data = self.log(x_data)
 		return x_data
 
 class ANN(object):
-	
+
 	def __init__(self,):
 		super(ANN, self).__init__()
 		self.layers = []
@@ -123,69 +98,36 @@ class ANN(object):
 	def addLayer(self,layer):
 		self.layers.append(layer)
 
-	def fit(self,x_data,y_data,size=20,learningRate=0.9):
-		#print "fit data:" ,x_data
-		# x_data，取前10个，每个
+	def fit(self,x_data,y_data,size=20,step=1000,learningRate=0.01):
+		countIndex = 0 #第n次训练
 		dataIndex = 0 #数据序列
 		length = len(x_data)
-		while dataIndex < length:
+		while countIndex < step:
 			count = 0 	#count为0
-			endflag = False
-			trainData = x_data[dataIndex] #当前训练的数据
-			trainResult = y_data[dataIndex] #当前训练的数据的结果
-			print '[0-Fit]begin trainData is', trainData,'result is', trainResult
-			while count < size:
-				trainData = x_data[dataIndex]
-				print '[0-Fit]begin count is',count,'/',size, trainData,'result is', trainResult
+			print '[0-Fit]begin count is %d/%d' % (countIndex,step)
+			while count < length:
+				trainInputData = trainData = x_data[count] #当前训练的数据
+				trainOutputData = y_data[count] #当前训练的数据的结果
+				#print '[0-Fit]begin count is',count,'/',size, trainData,'result is', trainResult
 				# 计算每层的输出
 				for layer in self.layers:
-					trainData = layer.calcWeight(trainData)
-					# trainData = np.array(trainData).reshape(-1,1)
-					print '[1-calcOutput]:',layer.name,trainData
-				print '>>>[1-calcOutput]:',trainData,trainResult
-				# 开始计算Err
-				# print '==============[Err]========='
+					trainData = layer.calcResult(trainData)
+				print '>>>[last-calcOutput]:',trainData,trainOutputData
+
+				# 开始计算loss
+				print 'loss is ',(trainOutputData-trainData)**2
+				# if (trainOutputData-trainData)**2 < 0.00001:
+					# return
+				delta = trainData-trainOutputData
 				begin = len(self.layers)
-				lastErr = []
-				lastWeight = []
 				while begin >0:
 					curLayer = self.layers[begin-1]
-					if(begin == len(self.layers)):
-						# 输出层,计算输出单元的err 
-						lastErr = curLayer.calcErrorLast(trainResult)
-						# print '[lastErr]',curLayer.errorData ,type(curLayer.errorData)
-						# 计算上一次的加权求和
-						lastWeight = curLayer.getErrWeightSum()
-					else:
-						lastErr = curLayer.calcError(lastWeight)
-						# print '[lastErr]',curLayer.errorData ,type(curLayer.errorData)
-						# 计算上一次的加权求和
-						lastWeight = curLayer.getErrWeightSum()
-					print '[2-calcError]last error' ,lastErr
-					# print '[calce]errWeightSum',lastWeight
+					delta = curLayer.changeWeight(delta,learningRate)
 					begin = begin - 1
-				
-				# 调整权重
-				for layer in self.layers:
-					if (endflag==False) and (abs(layer.errorData[0,0]) < 0.00001):
-						endflag = True
-						break;
-					# print '-------------------------------------'
-					# print '->>',layer.name,'err is:',type(layer.errorData),layer.errorData
-					# print '->>',layer.name,'weight is:',type(layer.weight),layer.weight,(layer.weight).shape
-					# print '->>',layer.name,'outdata is:',type(layer.outputData)
-					# print '->>',layer.name,'outdata is 2:',np.array(layer.outputData)
-					tmp = (np.asarray(layer.errorData)*np.array(layer.outputData)*learningRate)
-					# print '->>',layer.name, tmp ,type(tmp),tmp.shape
-					layer.weight = layer.weight + tmp
-					layer.intercept = layer.intercept +  (np.asarray(layer.errorData)*learningRate)
-					print '[3-rechange]',layer.name, layer.weight ,layer.intercept
 
-				count = count +1 #同一个数据开始下一次训练
-				if endflag==True:
-					break
-			dataIndex = dataIndex +1
-		
+				count = count +1 #开始训练下一个数据
+			countIndex = countIndex +1
+
 
 	def predict(self,x_data):
 		for layer in self.layers:
@@ -193,26 +135,25 @@ class ANN(object):
 		return x_data
 
 ann = ANN()
-layer1 = Layer(1,4)
-layer2 = Layer(4,4)
-layer3 = Layer(4,1,hidden=False)
+layer1 = Layer(1,20)
+layer2 = Layer(20,20)
+layer3 = Layer(20,1,hidden=False)
 ann.addLayer(layer1)
 ann.addLayer(layer2)
 ann.addLayer(layer3)
-ann.fit(x_data,y_data)
-print ann.predict([[0.2]])
+ann.fit(x_data[:100],y_data)
+print ann.predict([[0.2],[0.8]])
 
 
 x_test=np.linspace(-1,1,100)[:,np.newaxis]
 rs_real=np.square(x_test)-0.5
 
-ann_test=ann.predict(x_test.reshape(1,-1).tolist())
+ann_test=ann.predict(x_test.reshape(-1,1).tolist())
 
 print 'ann_test',ann_test,type(ann_test)
 
 
-plt2,=plt.plot(x_test,rs_real,color='blue',label='real')   
-plt3,=plt.plot(x_test,ann_test.reshape(-1,1),color='yellow',label='ANN')   
-# plt4,=plt.plot(x_test,lrPloy,color='yellow',label='ploy')   
+plt2,=plt.plot(x_test,rs_real,color='blue',label='real')
+plt3,=plt.plot(x_test,ann_test.reshape(-1,1),color='yellow',label='ANN')
 plt.legend(handles=[plt1,plt2,plt3])
 plt.show()

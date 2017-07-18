@@ -30,14 +30,14 @@ while index < 100:
         x = x_data[current]
         y = y_data[current]
         loss = y-h(x)
-        sum_a =  rate*(loss)*x[0]
+        sum_a =  rate*(loss)*x[0] # 步长
         sum_b =  rate*(loss)
         #print '>>>',weights,weights[0]*x+weights[1]
         #print x,y,h(x),y-h(x)
         weights[0] = weights[0] + sum_a
         weights[1] = weights[1] + sum_b
         current += 1
-    print index,current,weights,loss
+    print index,current,weights,loss**2
     index += 1
         
 print weights
@@ -46,7 +46,7 @@ print weights
 
 # 分割出1行1列子图，在1号作图
 plt.subplot(1,1,1)
-plt.title('y=x*2')
+plt.title('y=x*2+0.05')
 plt1,=plt.plot(x_data,y_data,'o',color='red',label='train data(noise)')   
 
 x_test=np.linspace(-1,1,100)[:,np.newaxis]
@@ -56,6 +56,5 @@ y_test = x_test * weights[0] +weights[1]
 
 plt2,=plt.plot(x_test,rs_real,color='blue',label='real')   
 plt3,=plt.plot(x_test,y_test.reshape(-1,1),color='yellow',label='Gradient')   
-# plt4,=plt.plot(x_test,lrPloy,color='yellow',label='ploy')   
 plt.legend(handles=[plt1,plt2,plt3])
 plt.show()
