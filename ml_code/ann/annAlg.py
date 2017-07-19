@@ -59,8 +59,8 @@ class Layer(object):
 
 	def changeWeight(self,delta,rate):
 		if self.hidden == True: # 隐藏层
-			self.weight = self.weight - (rate * delta * self.weight * self.outputData*(1- self.outputData))
-			self.intercept =  self.intercept   - (rate) * delta
+			# self.weight = self.weight - (rate * delta * self.weight * self.outputData*(1- self.outputData))
+			# self.intercept =  self.intercept   - (rate) * delta
 			return delta
 		else:  #输出层
 			self.weight = self.weight -(rate) * delta
@@ -69,7 +69,8 @@ class Layer(object):
 
 
 	def log(self,ndarray):
-		return 1/(1+np.exp(-ndarray))
+		# return 1/(1+np.exp(-ndarray))
+		return 2/(1+np.exp(-ndarray))-1
 
 	def doubles(self,ndarray):
 		return 2/(1+np.exp(-ndarray))-1
@@ -98,7 +99,7 @@ class ANN(object):
 	def addLayer(self,layer):
 		self.layers.append(layer)
 
-	def fit(self,x_data,y_data,size=20,step=1000,learningRate=0.01):
+	def fit(self,x_data,y_data,size=20,step=100,learningRate=0.01):
 		countIndex = 0 #第n次训练
 		dataIndex = 0 #数据序列
 		length = len(x_data)
