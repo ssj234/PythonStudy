@@ -3,6 +3,7 @@
 
 # 简书教程之3-隐藏层设计
 # http://www.jianshu.com/p/8e1e6c8f6d52
+# 本例中，输入结果是1维的，隐藏层有一个权重，输出层有一个权重 最终输出结果也是一个
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -152,7 +153,7 @@ def backprop_update(x,t,wh,wo,learning_rate):
 	d_wh = learning_rate * gradient_weight_hidden(x,zh,h,grad_hidden)
 	return (wh-d_wh.sum(),wo-d_wo.sum())
 
-# []
+# [--]
 # 开始训练
 
 # 初始化权重和学习率
