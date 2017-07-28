@@ -54,5 +54,5 @@ for i in range(10000):
         l1 = sess.run(tf.nn.relu(l1))
         l2 = l1.dot(sess.run(w2))+sess.run(b2)
         print '[[0.5]]',l2
-        #print sess.run(w1),sess.run(b1)
+        print sess.run(w1),sess.run(b1)
         #print np.array([[0.1]]).dot(sess.run(w1))+

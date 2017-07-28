@@ -1,4 +1,5 @@
 # use placeholder
+# placeholder can be replaced by numer or matrix
 import tensorflow as tf
 import numpy as np
 

@@ -3,12 +3,14 @@
 # why we need activation?
 # resolve the problem those we cannot use linear
 # add layer1 and layer2 ,each layer have weight and biases
-# tensorboard --logdir='logs/'
+# 启动命令:tensorboard --logdir='logs/'
+# tf.name_scope('weights') # 设置范围
 # tf.histogram_summary(layer_name+'/weights',Weights)
 # tf.histogram_summary(layer_name+'/biases',biases)
-# tf.scalar_summary('loss',loss)
-# merged = tf.merge_all_summaries() # write befor filewriter
-# writer.add_summary(result,i) # in train loop
+# 标量：tf.scalar_summary('loss',loss)
+# 合并：merged = tf.merge_all_summaries() # write befor filewriter
+# writer = tf.summary.FileWriter('logs/',sess.graph)
+# 写入：writer.add_summary(result,i) # in train loop
 
 import tensorflow as tf
 import numpy as np

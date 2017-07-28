@@ -1,4 +1,8 @@
-# dropout overfitting 
+#!/usr/bin/python
+# -*- coding: UTF-8 -*-
+# dropout over：fitting 
+# 没有设置dropout之前，train和test的cost相差较大
+# 设置dropout之后，相差较小 
 
 import tensorflow as tf
 from sklearn.datasets import load_digits
@@ -13,11 +17,14 @@ y = LabelBinarizer().fit_transform(y)
 X_train,X_test,y_train,y_test = train_test_split(X,y,test_size=3)
 
 def add_layer(inputs,in_size,out_size,activation_function=None):
-    layer_name = 'Layer %d-%d' % (in_size,out_size)
+    layer_name = 'Layer-%d-%d' % (in_size,out_size)
     #
     Weights = tf.Variable(tf.random_normal([in_size,out_size]))
     biases = tf.Variable(tf.zeros([1,out_size]) + 0.1,)
     Wx_plus_b = tf.matmul(inputs,Weights) + biases
+    # dropout
+    Wx_plus_b = tf.nn.dropout(Wx_plus_b,keep_prob)
+    
     if activation_function is None:
         outputs = Wx_plus_b
     else:
@@ -27,6 +34,7 @@ def add_layer(inputs,in_size,out_size,activation_function=None):
 
 xs = tf.placeholder(tf.float32,[None,64])
 ys = tf.placeholder(tf.float32,[None,10])
+keep_prob = tf.placeholder(tf.float32)
 
 l1 = add_layer(xs,64,100,activation_function=tf.nn.tanh)
 prediction = add_layer(l1,100,10,activation_function=tf.nn.softmax)
@@ -45,11 +53,12 @@ test_writer = tf.summary.FileWriter('logs/test',sess.graph)
 sess.run(tf.initialize_all_variables())
 
 for i in range(500):
-    sess.run(train_step,feed_dict={xs:X_train,ys:y_train})
+    sess.run(train_step,feed_dict={xs:X_train,ys:y_train,keep_prob:0.5})
     if i % 50 == 0:
-        train_result = sess.run(merged,feed_dict={xs:X_train,ys:y_train})
-        test_result = sess.run(merged,feed_dict={xs:X_test,ys:y_test})
-
+        train_result = sess.run(merged,feed_dict={xs:X_train,ys:y_train,keep_prob:1})
+        test_result = sess.run(merged,feed_dict={xs:X_test,ys:y_test,keep_prob:1})
+        train_writer.add_summary(train_result,i)
+        test_writer.add_summary(test_result,i)
 
 
 
