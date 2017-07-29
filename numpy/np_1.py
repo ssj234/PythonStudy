@@ -120,7 +120,7 @@ arrayInfo(np.eye(3),'np.eye(3)')
 # 生成一个单位矩阵
 nplist = np.arange(1,10).reshape(3,3)
 arrayInfo(nplist,'np.arange(1,7).reshape(2,3)')
-print 'inverst:inv(nplist)',inv(nplist)  	  # 求矩阵的逆
+print 'inverst:inv(nplist)',inv(nplist + np.eye(3))  	  # 求矩阵的逆
 print 'np.transpose:\n',np.transpose(nplist)  # 求转置矩阵
 print 'nplist.T\n',nplist.T       # 求转置矩阵
 print 'det(nplist):',det(nplist)  # 行列式
