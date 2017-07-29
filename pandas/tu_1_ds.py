@@ -47,23 +47,38 @@ print df.describe()  # 打印数据描述 最大值 最小 平均值  分布等
 
 # select
 
-print df.iloc[1:3,2:4] # 选择12行 23列
-print df.loc['2017-03-01':'2017-03-04',['B','D']] # 4行2列
-# df[row][column]  先选择行 再选择列
-# DataFrame 的每个列是一个Series
+nadf = pd.DataFrame(np.arange(12).reshape(3,4),index=['one','two','three'],columns=['A','B','C','D'])
+print nadf
 
-# 重新索引
+# 使用切片
+print nadf[0:2]   # 使用下标 必须使用:
+print nadf['one':'two']   # 使用行标,必须使用:
 
-obj = pd.Series([4.5,7.2,-5.3,3.6],index = ['d','b','a','c'])
-obj2 = obj.reindex(['a','b','c','d']) # 修改Series的索引顺序
-# 除了修改索引顺序 还可以添加或删除行标，默认赋值fill_value=0.0
-obj2 = obj.reindex(['a','b','c','d','e','f'],fill_value=0.0)
+# 使用loc 按照行标切片  行标包括结尾
+print nadf.loc['one':'two'] # 两个参数，第一个是行,必须使用行标，第二个是列
+print nadf.loc['one':'two','B':'D'] # 两个参数，第一个是行,必须使用行标，第二个是列
+print nadf.loc[['one','three'],['B','D']] # 两个参数，可以是列表，也可以是:的切片
 
+# 使用iloc 按照下标切片  下标不包括结尾
+print nadf.iloc[0:2] #
+print nadf.iloc[0:2,2:4]  # 获取0和1行，2和3列
+print nadf.iloc[[1,2],[0,2]]  # 获取1和2行 0和2列
 
+# 按照条件选择
+print nadf[nadf>3] # 大于3的去原来的值，否则为NaN
+nadfb = nadf[nadf>3]
 
+# 添加列
+nadf['F'] = pd.Series([91,92,93],index=['one','two','three'])
 
+# 修改列
+nadf['F'] = 1
 
-
+# 缺失值处理
+# dropna或者fillna
+print nadfb
+print nadfb.dropna()  # 丢弃NaN的值
+print nadfb.fillna(1) # 填充值
 
 
 
