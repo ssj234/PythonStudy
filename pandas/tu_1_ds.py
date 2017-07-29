@@ -81,6 +81,12 @@ print nadfb.dropna()  # 丢弃NaN的值
 print nadfb.fillna(1) # 填充值
 
 
+# read_csv方法可以设置header和index_col 
+# header默认为0，第0行为列名 可以设置为None
+# index_col 默认为None，设置行标
+
+rd = pd.read_csv('./read.csv',index_col=0)
+print rd
 
 
 

@@ -36,5 +36,5 @@ print metrics.confusion_matrix(y_true=testY,y_pred=y_pred)
 
 # 将决策树的值保存到文件
 
-with open('./tree.dot','w') as fw:
+with open('./out/tree.dot','w') as fw:
 	tree.export_graphviz(clf,out_file=fw)
