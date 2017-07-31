@@ -46,6 +46,16 @@ from sklearn.linear_model import LogisticRegression
 lr = LogisticRegression()
 lr.fit(trainX,trainY)
 
+# 预测测试集并计算正确率
+predY = lr.predict(testX)
+## 导入度量类
+from sklearn import metrics
+## 判断成功率
+print metrics.accuracy_score(y_true=testY,y_pred=predY)
+## 混淆矩阵
+print metrics.confusion_matrix(y_true=testY,y_pred=predY)
+
+
 # 绘制区域，创建100个点，从1到10等差数列
 nb_of_xs = 100
 rd0 = np.linspace(1,10,num=nb_of_xs).reshape(-1,1)
@@ -66,5 +76,7 @@ plt.contourf(xx, yy, classification_plane, cmap=cmap)
 plt.xlabel('Thickness')
 plt.ylabel('Cell Size')
 plt.show()
+
+
 
 
