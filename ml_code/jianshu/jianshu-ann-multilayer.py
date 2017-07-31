@@ -13,7 +13,7 @@ from matplotlib.colors import colorConverter, ListedColormap
 import itertools
 import collections
 
-
+# [-1-]
 # 构造样本相关数据
 digits = datasets.load_digits()
 
@@ -50,12 +50,15 @@ def softmax(z):
 # 定义层
 class Layer(object):
 
+	# 返回该层的参数(LinearLayer)
 	def get_params_iter(self):
 		return []
 
+	# 返回梯度
 	def get_params_grad(self,X,output_grad):
 		return []
 
+	# 返回输出
 	def get_output(self,X):
 		pass
 
@@ -79,7 +82,7 @@ class LinearLayer(Layer):
 		return X.dot(self.W) + self.b
 
 	# 计算梯度
-	def get_params_grad(self, Y, output_grad):
+	def get_params_grad(self, X, output_grad):
 		JW = X.T.dot(output_grad)
 		Jb = np.sum(output_grad,axis=0)
 		return [g for g in itertools.chain(np.nditer(JW),np.nditer(Jb))]
@@ -133,7 +136,7 @@ def forward_step(input_samples,layers):
 	for layer in layers:
 		Y = layer.get_output(X)
 		activations.append(Y)
-		X = activations(-1)
+		X = activations[-1]
 	return activations
 
 # 向后
@@ -246,4 +249,14 @@ x1,x2,y1,y2 = plt.axis()
 plt.axis((0,nb_of_iterations,0,2.5))
 plt.grid()
 plt.show()
+
+
+
+# 计算性能
+
+y_true = np.argmax(T_test,axis=1)
+activations = forward_step(X_test,layers)
+y_pred = np.argmax(activations[-1],axis=1)
+test_accuracy = metrics.accuracy_score(y_true,y_pred)
+print 'test is ', test_accuracy
 
