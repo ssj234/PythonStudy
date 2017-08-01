@@ -42,8 +42,17 @@ plt.ylabel('test-Cell Size')
 
 
 # 线性回归进行分类
-from sklearn.linear_model import LogisticRegression
-lr = LogisticRegression()
+# from sklearn.linear_model import LogisticRegression
+# lr = LogisticRegression()
+# lr.fit(trainX,trainY)
+
+from sklearn.preprocessing import StandardScaler
+from sklearn.svm import LinearSVC
+
+ss = StandardScaler()
+trainX = ss.fit_transform(trainX)
+testX = ss.fit_transform(testX)
+lr = LinearSVC()
 lr.fit(trainX,trainY)
 
 # 预测测试集并计算正确率
@@ -60,7 +69,9 @@ print metrics.confusion_matrix(y_true=testY,y_pred=predY)
 nb_of_xs = 100
 rd0 = np.linspace(1,10,num=nb_of_xs).reshape(-1,1)
 rd1 = np.linspace(1,10,num=nb_of_xs).reshape(-1,1)
-xx, yy = np.meshgrid(rd0, rd1) # create the grid
+xx1, yy1 = np.meshgrid(rd0, rd1) # create the grid
+xx = ss.fit_transform(xx1)
+yy = ss.fit_transform(yy1)
 ## 创建颜色映射
 cmap = ListedColormap([
         colorConverter.to_rgba('r', alpha=0.30),
@@ -72,7 +83,7 @@ for i in range(nb_of_xs):
         classification_plane[i,j] = lr.predict(np.asmatrix([xx[i,j], yy[i,j]]))
 
 plt.subplot(2,2,3)
-plt.contourf(xx, yy, classification_plane, cmap=cmap)
+plt.contourf(xx1, yy1, classification_plane, cmap=cmap)
 plt.xlabel('Thickness')
 plt.ylabel('Cell Size')
 plt.show()
