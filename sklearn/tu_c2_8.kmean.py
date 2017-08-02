@@ -39,6 +39,6 @@ gbc_y_pred = gbc.predict(X_test)
 
 
 from sklearn.metrics import classification_report
-print '--------[LinearSVC][!pca]-----------'
+print '--------[GradientBoostingClassifier]-----------'
 print classification_report(Y_test,gbc_y_pred,target_names=np.arange(10).astype(str))
 
