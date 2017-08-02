@@ -87,6 +87,7 @@ print nadfb.fillna(1) # 填充值
 
 rd = pd.read_csv('./read.csv',index_col=0)
 print rd
+print rd.info() # 查看信息
 
 
 
