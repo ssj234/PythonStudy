@@ -9,6 +9,7 @@
 ```
 y_train.value_counts() # 查看每个数值的数量
 y_train.info() # DataFrame
+y_train.describe() # 查看数据数据、均值、最大、最小值等
 ```
 
 * 拆分数据集合：
@@ -17,6 +18,11 @@ y_train.info() # DataFrame
 from sklearn.cross_validation import train_test_split
 # 第0列为列标，1-9为X数据 10为Y的值
 X_train,X_test,y_train,y_test=train_test_split(data[column_names[1:10]],data[column_names[10]],test_size=0.25,random_state=33)
+```
+
+* 填充数据： 有时数据的某些列会有缺失，需要对数据进行填充或丢弃,填充时可以使用平均值或众数
+```
+X['age'].fillna(X['age'].mean(),inplace=True) # 对缺失的年龄列填充平均值
 ```
 
 * 标准化数据:保证每个维度的特征数据方差为1，均值为0，使得预测结果不被某些维度过大的特征值而主导,公式为：(X-mean)/std，减去平均值后除以方差
@@ -59,6 +65,12 @@ array([[ 1.,  1.,  0.,  0.,  0.,  1.,  0.,  0.,  1.,  0.],
 
 ```
 
+对性别进行处理时，可以直接修改其值
+```
+titanic.loc[titanic['Sex'] == 'male', 'Sex'] = 0
+titanic.loc[titanic['Sex'] == 'female', 'Sex'] = 1
+```
+
 * 降维
 ```
 from sklearn.decomposition import PCA
@@ -66,6 +78,20 @@ estimator=PCA(n_components=2) # 将64维压缩到2维
 x_pca=estimator.fit_transform(x_digits)
 pca_X_train = estimator.fit_transform(X_train)
 pca_X_test = estimator.transform(X_test)
+```
+
+* 特征选择：其目的是观察每个特征对结果的影响程度，方法是：每次进行又放回的采样，对于某列特征，如titanic中的age维度，第一次观察错误率err1，第二次混淆age，随机添加噪音值，再次观察错误率err2，如果错误率变化明显，说明age对结果的影响较大。
+
+```
+# 导入SelectKBest
+from sklearn.feature_selection import SelectKBest, f_classif
+selector = SelectKBest(f_classif,k=2)
+selector.fit(titanic[predictions],titanic['survived'])
+scores = -np.log10(selector.pvalues_)
+# 展示图像
+plt.bar(range(len(predictions)),scores)
+plt.xticks(range(len(predictions)),predictions,rotation='vertical')
+plt.show()
 ```
 
 2. 使用分类或回归工具进行训练,常用的工具有：
@@ -198,6 +224,20 @@ print metrics.adjusted_rand_score(Y_test,y_pred)
 sc_socre=silhouette_score(X,kmeans_model.labels_,metric='euclidean')
 ```
 
+
+* 交叉验证： 主要思路是将所有的样本拆分为两个部分：训练集和测试集。 将训练集分为三份，Train1,Train2,Train3；对这三份进行交叉验证，第一次使用1和2进行训练，使用3进行测试；第二次使用2和3进行训练，使用1进行测试；最后，使用1和3进行训练，使用2进行验证。得到了三个准确率，最后进行平均化。
+
+```
+from sklearn.cross_validation import KFold
+kf = KFold(titanic.shape[0],n_folds=3,random_state=1) # 3层交叉验证
+predictions = ['pclass','sex','age','embarked','namelength','homelength']
+alg = LinearRegression() # 线性回归
+for train,test in kf:
+    train_predictions = titanic[predictions].iloc[train,:]
+    train_target = titanic['survived'].iloc[train,:]
+    alg.fit(train_predictions,train_target) # 训练
+    test_predictions = alg.predict(titanic[predictions].iloc[train,:]) # 预测
+```
 
 3. 在测试集上，对模型进行度量，分类和回顾的度量方法不同
 
